@@ -113,6 +113,10 @@ button:hover {
     .result_label, span{
         font-weight: bolder;
         color: #e2f103;
+        margin-left: 2%;
+    }
+    .p{
+      color: #e47d7d;
     }
 
     @keyframes fadeInOut {
@@ -190,9 +194,9 @@ button:hover {
         <button type="submit">Submit</button>
     </form>
     <button onclick="reset()">Reset</button>
-<div class="result_label" style="color: white; margin-top: 19px;">Best Geometry: <span id="Geometry_span">?</span></div>
-<div class="result_label" style="color: white; margin-top: 19px;">Best Functional: <span id="DFT_span">?</span></div>
-<div class="result_label" style="color: white; margin-top: 19px;">Best Vibrational Scaling: <span id="Scaling_span">?</span></div>
+<div class="result_label" style="color: white; margin-top: 19px;">Best Geometry: <br><span id="Geometry_span1">?</span><span class="p" id="p1"></span><br><span id="Geometry_span2"></span><span class="p" id="p2"></span><br><span id="Geometry_span3"></span><span class="p" id="p3"></span><br><span id="Geometry_span4"></span><span class="p" id="p4"></span></div>
+<div class="result_label" style="color: white; margin-top: 19px;">Best Functional: <br><span id="DFT_span1">?</span><span class="p" id="_p1"></span><br><span id="DFT_span2"></span><span class="p" id="_p2"></span><br><span id="DFT_span3"></span><span class="p" id="_p3"></span><br><span id="DFT_span4"></span><span class="p" id="_p4"></span></div>
+<div class="result_label" style="color: white; margin-top: 19px;">Best Vibrational Scaling: <br><span id="Scaling_span1">?</span><span class="p" id="p1_"></span><br><span id="Scaling_span2"></span><span class="p" id="p2_"></span><br><span id="Scaling_span3"></span><span class="p" id="p3_"></span><br><span id="Scaling_span4"></span><span class="p" id="p4_"></span></div>
 </div>
   <script>
     const functionals = [
@@ -373,13 +377,12 @@ let scaled_x = x.map((val, i) => (val - MEANS[i]) / STDS[i]);
 
 console.log(scaled_x)
 //calculate_functional([[1.0748023016765025, -0.10759842951261754, -0.09304841250466668, -0.09304841250466668, 0.7974387908963882, -0.40092883946848856, 0.743664931280151, -0.349110036508565, -0.1247662946354208, -0.06565328834732721, -0.1247662946354208, -0.22141481146913056, -0.16614859745502614, -0.3363786679750273, -0.36196222386004073, -0.19922347322410547]])
-let functional_array = calculate_functional([scaled_x])
+  let functional_array = calculate_functional([scaled_x])
   const maxIndex_funcional = functional_array.reduce((maxIdx, current, idx, array) => current > array[maxIdx] ? idx : maxIdx, 0)
   let frequency_array = calculate_frequency([scaled_x])
   const maxIndex_frequency = frequency_array.reduce((maxIdx, current, idx, array) => current > array[maxIdx] ? idx : maxIdx, 0);
-  console.log(maxIndex_funcional, maxIndex_frequency)
 
-  return [maxIndex_funcional, maxIndex_frequency]
+  return [functional_array, frequency_array]
 }
     function processMolecule(event) {
         event.preventDefault(); // Prevent page reload
@@ -391,39 +394,51 @@ let functional_array = calculate_functional([scaled_x])
     }
 
     function myFunction(atoms) {
-        let Result = Process(atoms)
-        if(Result[0] == 0){
-            document.getElementById("Geometry_span").innerText= "B3LYP/6-31G(d)"
-            document.getElementById("DFT_span").innerText= "MN12SX/6-31G(d)"
-        }
-        else if(Result[0] == 1){
-            document.getElementById("Geometry_span").innerText= "B1B95/6-31G(d)"
-            document.getElementById("DFT_span").innerText= "B1B95/6-31G(d)"
-        }
-        else if(Result[0] == 2){
-            document.getElementById("Geometry_span").innerText= "PKZBPKZB/6-31G(d)"
-            document.getElementById("DFT_span").innerText= "PKZBPKZB/6-31G(d)"
-        }
-        else if(Result[0] == 3){
-            document.getElementById("Geometry_span").innerText= "PW91PBE/6-31G(d)"
-            document.getElementById("DFT_span").innerText= "PW91PBE/6-31G(d)"
+      let geometries = [['B3LYP/6-31G(d)',"MN12SX/6-31G(d)"], ["B1B95/6-31G(d)", "B1B95/6-31G(d)"], ["PKZBPKZB/6-31G(d)", "PKZBPKZB/6-31G(d)"], ["PW91PBE/6-31G(d)", "PW91PBE/6-31G(d)"]]
+      let frequencies = ["0.80", "0.91", "0.95", "0.97", "1.00"]
+        function nthHighestIndex(arr, n) {
+          // Get sorted indexes by value descending
+          const sortedIndexes = arr
+            .map((value, index) => ({ value, index }))
+            .sort((a, b) => b.value - a.value);
+          
+          return sortedIndexes[n - 1]?.index; // n-1 because nth element in zero-indexed
         }
 
-        if(Result[1] == 0){
-            document.getElementById("Scaling_span").innerText= "0.80"
-        }
-        if(Result[1] == 1){
-            document.getElementById("Scaling_span").innerText= "0.91"
-        }
-        if(Result[1] == 2){
-            document.getElementById("Scaling_span").innerText= "0.95"
-        }
-        if(Result[1] == 3){
-            document.getElementById("Scaling_span").innerText= "0.97"
-        }
-        if(Result[1] == 4){
-            document.getElementById("Scaling_span").innerText= "1.00"
-        }
+        let Result = Process(atoms)
+
+          document.getElementById("Geometry_span1").innerText= geometries[nthHighestIndex(Result[0], 1)][0] 
+          document.getElementById("p1").innerText= Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("_p1").innerText= Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("DFT_span1").innerText= geometries[nthHighestIndex(Result[0], 1)][1]
+          document.getElementById("p1").innerText=Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("Scaling_span1").innerText= frequencies[nthHighestIndex(Result[1], 1)]
+          document.getElementById("p1_").innerText=Number(Result[1][nthHighestIndex(Result[1], 1)].toFixed(2))*100+'%'
+
+         document.getElementById("Geometry_span2").innerText= geometries[nthHighestIndex(Result[0], 2)][0]
+         document.getElementById("p2").innerText= Number(Result[0][nthHighestIndex(Result[0], 2)].toFixed(2))*100+'%'
+         document.getElementById("_p2").innerText= Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("DFT_span2").innerText= geometries[nthHighestIndex(Result[0], 2)][1]
+          document.getElementById("p2").innerText= Number(Result[0][nthHighestIndex(Result[0], 2)].toFixed(2))*100+'%'
+          document.getElementById("Scaling_span2").innerText= frequencies[nthHighestIndex(Result[1], 2)]
+          document.getElementById("p2_").innerText= Number(Result[1][nthHighestIndex(Result[1], 2)].toFixed(2))*100+'%'
+        
+           document.getElementById("Geometry_span3").innerText= geometries[nthHighestIndex(Result[0], 3)][0]
+           document.getElementById("p3").innerText= Number(Result[0][nthHighestIndex(Result[0], 3)].toFixed(2))*100+'%'
+           document.getElementById("_p3").innerText= Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("DFT_span3").innerText= geometries[nthHighestIndex(Result[0], 3)][1]
+          document.getElementById("p3").innerText= Number(Result[0][nthHighestIndex(Result[0], 3)].toFixed(2))*100+'%'
+          document.getElementById("Scaling_span3").innerText= frequencies[nthHighestIndex(Result[1], 3)]
+          document.getElementById("p3_").innerText= Number(Result[1][nthHighestIndex(Result[1], 3)].toFixed(2))*100+'%'
+
+           document.getElementById("Geometry_span4").innerText= geometries[nthHighestIndex(Result[0], 4)][0]
+           document.getElementById("p4").innerText=Number(Result[0][nthHighestIndex(Result[0], 4)].toFixed(2))*100+'%'
+           document.getElementById("_p4").innerText= Number(Result[0][nthHighestIndex(Result[0], 1)].toFixed(2))*100+'%'
+          document.getElementById("DFT_span4").innerText= geometries[nthHighestIndex(Result[0], 4)][1]
+          document.getElementById("p4").innerText=Number(Result[0][nthHighestIndex(Result[0], 4)].toFixed(2))*100+'%'
+          document.getElementById("Scaling_span4").innerText= frequencies[nthHighestIndex(Result[1], 4)]
+          document.getElementById("p4_").innerText=Number(Result[1][nthHighestIndex(Result[1], 4)].toFixed(2))*100+'%'
+        
         
     }
 </script>
